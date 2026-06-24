@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シフトログ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header>
+    <h1>シフトログ</h1>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" data-tab="calendar">カレンダー</button>
+    <button class="tab-btn" data-tab="salary">給料情報</button>
+    <button class="tab-btn" data-tab="workplace">勤務先一覧</button>
+  </nav>
+
+  <!-- ===== カレンダー ===== -->
+  <div id="calendar" class="tab-content active">
+    <h2>シフトカレンダー</h2>
+    <div class="calendar-header">
+      <button id="prevMonth">&lt;</button>
+      <h3 id="monthLabel"></h3>
+      <button id="nextMonth">&gt;</button>
+    </div>
+
+    <div class="weekdays">
+      <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+    </div>
+
+    <div id="calendarGrid" class="calendar"></div>
+
+    <h3>シフト一覧</h3>
+    <ul id="shiftList" class="shift-list"></ul>
+  </div>
+
+  <!-- ===== 給料情報 ===== -->
+  <div id="salary" class="tab-content">
+    <h2>給料情報</h2>
+
+    <!-- 月／年の切り替えボタン -->
+    <div class="sub-tab-buttons">
+      <button class="sub-tab-btn active" data-target="monthly">月</button>
+      <button class="sub-tab-btn" data-target="yearly">年</button>
+    </div>
+
+    <!-- ===== 月間ビュー ===== -->
+    <div id="monthly" class="sub-tab-content active">
+      <div class="salary-header">
+        <button id="prevSalaryMonth">&lt;</button>
+        <span id="salaryMonthLabel"></span>
+        <button id="nextSalaryMonth">&gt;</button>
+      </div>
+
+      <div class="goal-section">
+        <label>月間目標：</label>
+        <input type="number" id="monthlyGoal" placeholder="目標金額を入力">
+        <button id="saveMonthlyGoal">保存</button>
+      </div>
+
+      <div class="actual-section">
+        <label>実際の給料（手取りなど）：</label>
+        <input type="number" id="monthlyActual" placeholder="実績を入力">
+        <button id="saveMonthlyActual">保存</button>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+
+      <p id="salarySummary">まだシフトが登録されていません。</p>
+    </div>
+
+    <!-- ===== 年間ビュー ===== -->
+    <div id="yearly" class="sub-tab-content">
+      <div class="salary-header">
+        <button id="prevYearBtn">&lt;</button>
+        <span id="yearLabel"></span>
+        <button id="nextYearBtn">&gt;</button>
+      </div>
+
+      <div class="goal-section">
+        <label>年間目標：</label>
+        <input type="number" id="yearGoal" placeholder="目標金額を入力">
+        <button id="saveYearGoal">保存</button>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="yearlyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 勤務先一覧 ===== -->
+  <div id="workplace" class="tab-content">
+    <h2>勤務先設定</h2>
+    <div class="workplace-header">
+      <h3>勤務先一覧</h3>
+      <button id="openAddWorkplace" class="add-btn">＋ 勤務先を追加</button>
+    </div>
+    <ul id="workplaceList"></ul>
+  </div>
+
+  <!-- ===== 勤務先編集モーダル ===== -->
+  <div id="editWorkplaceModal" class="modal">
+    <div class="modal-content">
+      <h3>勤務先の編集</h3>
+      <label>勤務先名：</label>
+      <input type="text" id="editWorkplaceName">
+
+      <label>通常時給：</label>
+      <input type="number" id="editHourlyWage">
+
+      <label>深夜時給：</label>
+      <input type="number" id="editNightWage">
+
+      <label>残業率(%)：</label>
+      <input type="number" id="editOvertimeRate">
+
+      <label>交通費(円)：</label>
+      <input type="number" id="editTransportCost">
+
+      <div class="modal-buttons">
+        <button id="saveEditWorkplace">保存</button>
+        <button id="cancelEditWorkplace">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 勤務先追加モーダル ===== -->
+  <div id="addWorkplaceModal" class="modal">
+    <div class="modal-content">
+      <h3>勤務先の追加</h3>
+      <label>勤務先名：</label>
+      <input type="text" id="addWorkplaceName">
+
+      <label>通常時給：</label>
+      <input type="number" id="addHourlyWage">
+
+      <label>深夜時給：</label>
+      <input type="number" id="addNightWage">
+
+      <label>残業率(%)：</label>
+      <input type="number" id="addOvertimeRate">
+
+      <label>交通費(円)：</label>
+      <input type="number" id="addTransportCost">
+
+      <div class="modal-buttons">
+        <button id="saveAddWorkplace">保存</button>
+        <button id="cancelAddWorkplace">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== シフト入力モーダル ===== -->
+  <div id="shiftModal">
+    <h3 id="modalDate"></h3>
+    <label>勤務先:</label>
+    <select id="shiftWorkplace"></select>
+    <label>勤務時間（例: 9:00-17:00）:</label>
+    <input type="text" id="shiftTime">
+    <label>休憩時間（分）:</label>
+    <input type="number" id="breakTime" value="60">
+    <label>天引き（円）:</label>
+    <input type="number" id="deduction" value="0">
+    <label>手当（円）:</label>
+    <input type="number" id="bonus" value="0">
+    <button id="saveShift" class="add-shift-btn">登録</button>
+    <button id="deleteShift" class="delete-btn" style="display:none;">削除</button>
+    <button id="closeModal" class="close-btn">閉じる</button>
+  </div>
+
+  <!-- ===== スクリプト ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
